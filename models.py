@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, Float
 from database import Base
 
+# Started setting up ORM, but decided it might not be worth it, so leaving as is for now.
+
 def create_model(tablename: str, columns: dict):
 
     # Main attributes of table
