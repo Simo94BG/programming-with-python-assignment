@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Float
-from database import Base
+from src.database import Base
 
 # Started setting up ORM, but decided it might not be worth it, so leaving as is for now.
 
