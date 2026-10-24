@@ -25,6 +25,7 @@ if __name__ == "__main__":
     # 3. Find Best Ideal
     train.find_best_ideals(ideal.df)
     train.plot_best_ideals(ideal.df)
+    train.plot_best_ideals_deviation(ideal.df)
 
     # 4. Map Test Data
     test.map_ideals_to_test(ideal.df, train.best_ideals_df)

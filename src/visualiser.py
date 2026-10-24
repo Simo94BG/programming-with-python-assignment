@@ -1,66 +1,123 @@
-import matplotlib.pyplot as plt
 from bokeh.plotting import figure, output_file, save
-from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.models import ColumnDataSource, HoverTool, Span
 
 def plot_train_vs_chosen_ideal(df_train, df_ideal, df_mapping, visualisation_path):
 
-    x = df_train["x"]
-
+    x_col = df_train["x"]
     mapping = dict(zip(df_mapping["train_function"], df_mapping["ideal_function"]))
 
     for train_col, ideal_col, in mapping.items():
-        plt.figure(figsize=(10, 5))
+        output_file(f"{visualisation_path}{train_col}_vs_{ideal_col}.html")
+        y_train = df_train[train_col]
+        y_ideal = df_ideal[ideal_col]
+        deviation = y_train - y_ideal
 
-        # Plot training function
-        plt.plot(x, df_train[train_col], label=f"Training: {train_col}", linewidth=2)
+        source = ColumnDataSource({
+            "x_col": x_col,
+            "y_train": y_train,
+            "y_ideal": y_ideal,
+            "deviation": deviation
+        })
 
-        # Plot ideal function
-        plt.plot(x, df_ideal[ideal_col], label=f"Ideal: {ideal_col}", linestyle="--")
+        p = figure(
+            title=f"{train_col} vs {ideal_col}"
+            ,x_axis_label="X Values"
+            ,y_axis_label="Y Values"
+            ,tools="pan, wheel_zoom, box_zoom, reset, save"
+            ,sizing_mode="stretch_both"
+        )
 
-        plt.title(f"{train_col} vs {ideal_col}")
-        plt.xlabel("x")
-        plt.ylabel("y")
-        plt.legend()
-        plt.grid(True)
+        p.title.text_font_size = "20pt"
+        p.title.align = "center"
+        p.title.text_font_style = "bold"
 
-        plt.tight_layout()
-        plt.savefig(f"{visualisation_path}{train_col}_vs_{ideal_col}.png", dpi=300)
-        #plt.show()
-        plt.close()
+        p.line(
+            x="x_col"
+            ,y="y_train"
+            ,source=source
+            ,line_width=2
+            ,color="black"
+            ,legend_label="Train"
+        )
+
+        p.line(
+            x="x_col"
+            ,y="y_ideal"
+            ,source=source
+            ,line_width=2
+            ,color="blue"
+            ,legend_label="Ideal"
+        )
+
+        hover = HoverTool(
+            tooltips=[
+                ("x", "@x_col"),
+                ("Train", "@y_train{0.000}"),
+                ("Ideal", "@y_ideal{0.000}"),
+                ("Deviation", "@deviation{0.000}")
+            ],
+            mode="vline" # Hover follows vertical line at x
+        )
+
+        p.add_tools(hover)
+        p.legend.click_policy = "hide"
+
+        save(p)
+
+def plot_train_vs_chosen_ideal_deviation(df_train, df_ideal, df_mapping, visualisation_path):
+    x_col = df_train["x"]
+    mapping = dict(zip(df_mapping["train_function"], df_mapping["ideal_function"]))
+
+    for train_col, ideal_col, in mapping.items():
+        output_file(f"{visualisation_path}{train_col}_vs_{ideal_col}_deviation.html")
+        y_train = df_train[train_col]
+        y_ideal = df_ideal[ideal_col]
+        deviation = y_train - y_ideal
+
+        source = ColumnDataSource({
+            "x_col": x_col,
+            "deviation": deviation
+        })
+
+        p = figure(
+            title=f"{train_col} vs {ideal_col} - Deviation"
+            ,x_axis_label="X Values"
+            ,y_axis_label="Deviation"
+            ,tools="pan, wheel_zoom, box_zoom, reset, save"
+            ,sizing_mode="stretch_both"
+        )
+
+        p.title.text_font_size = "20pt"
+        p.title.align = "center"
+        p.title.text_font_style = "bold"
+
+        # Add black axis lines
+        x_zero = Span(location=0, dimension='height', line_color='black', line_width=2)
+        y_zero = Span(location=0, dimension='width', line_color='black', line_width=2)
+        p.add_layout(x_zero)
+        p.add_layout(y_zero)
+
+        p.scatter(
+            x="x_col"
+            ,y="deviation"
+            ,source=source
+            ,size=8
+            ,color="black"
+            ,alpha=0.6
+            ,legend_label="Deviation"
+        )
+
+        hover = HoverTool(tooltips=[
+            ("x", "@x_col{0.0}")
+            , ("Deviation", "@deviation{0.000}")
+        ])
+        p.add_tools(hover)
+
+        p.legend.click_policy = "hide"
+
+        save(p)
 
 def plot_test_vs_chosen_ideal(df_test_mapped, visualisation_path, mapped_only = False):
-
-    file_name = "test_vs_chosen_ideal"
-
-    if mapped_only:
-        df_test_mapped = df_test_mapped[df_test_mapped["ideal_function"].notna()]
-        file_name = "test_vs_chosen_ideal_mapped_only"
-
-    ideal_functions = sorted(df_test_mapped["ideal_function"].dropna().unique().tolist())
-    ideal_function_colours = ["Red", "Blue", "Green", "Yellow"]
-    ideal_functions_dict = dict(zip(ideal_functions, ideal_function_colours))
-
-    x = df_test_mapped["x_test"]
-    plt.figure(figsize=(12, 8))
-    plt.scatter(x, df_test_mapped["y_test"], label="Test", color="Black")
-
-    #plt.scatter(x, df_test_mapped["y_ideal"], label="Mapped Ideal")
-
-    for ideal_function, ideal_colour in ideal_functions_dict.items():
-        df_selected_values = df_test_mapped[df_test_mapped["ideal_function"] == ideal_function]
-        plt.scatter(df_selected_values["x_test"], df_selected_values["y_ideal"], label=ideal_function, color=ideal_colour)
-
-    plt.title("Test vs Chosen Ideal")
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.legend()
-    plt.grid(True)
-
-    plt.tight_layout()
-    plt.savefig(f"{visualisation_path}{file_name}.png", dpi=300)
-    plt.close()
-
-def plot_test_vs_chosen_ideal_interactive(df_test_mapped, visualisation_path, mapped_only = False):
 
     output_file(f"{visualisation_path}test_vs_chosen_ideal.html")
 
@@ -99,10 +156,10 @@ def plot_test_vs_chosen_ideal_interactive(df_test_mapped, visualisation_path, ma
     )
 
     hover = HoverTool(tooltips=[
-        ("x", "@x_test")
-        ,("Test", "@y_test")
-        ,("Ideal", "@y_ideal")
-        ,("Deviation", "@deviation")
+        ("x", "@x_test{0.0}")
+        ,("Test", "@y_test{0.000}")
+        ,("Ideal", "@y_ideal{0.000}")
+        ,("Deviation", "@deviation{0.000}")
         ,("Ideal Function", "@ideal_function")
     ])
     p.add_tools(hover)

@@ -20,8 +20,3 @@ def initial_setup():
 
     print("Database re-created at:", engine.url, "...")
     print("Initial Setup Completed.")
-
-def print_error(message):
-    red_colour = "\033[91m"
-    reset_colour = "\033[0m"
-    print(red_colour + message + reset_colour)

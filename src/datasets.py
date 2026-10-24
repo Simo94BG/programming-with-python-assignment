@@ -1,7 +1,7 @@
 import pandas as pd
 from .database import engine
 from .analyser import calculate_train_ideal_sse, find_best_ideal, assign_ideal_to_test
-from .visualiser import plot_train_vs_chosen_ideal, plot_test_vs_chosen_ideal, plot_test_vs_chosen_ideal_interactive
+from .visualiser import plot_train_vs_chosen_ideal, plot_train_vs_chosen_ideal_deviation, plot_test_vs_chosen_ideal
 
 class Dataset:
     def __init__(self, file_location, db_table, visualisation_path):
@@ -56,6 +56,9 @@ class TrainDataset(Dataset):
     def plot_best_ideals(self, df_ideal):
         plot_train_vs_chosen_ideal(self.df, df_ideal, self.best_ideals_df, self.visualisation_path)
 
+    def plot_best_ideals_deviation(self, df_ideal):
+        plot_train_vs_chosen_ideal_deviation(self.df, df_ideal, self.best_ideals_df, self.visualisation_path)
+
 class TestDataset(Dataset):
     def __init__(self, file_location, db_table, visualisation_path):
         super().__init__(file_location, db_table, visualisation_path)
@@ -67,10 +70,8 @@ class TestDataset(Dataset):
         self.mapped_df = mapped_test.df
 
     def plot_mapped_test(self):
-        #plot_test_vs_chosen_ideal(self.mapped_df, mapped_only = True)
-        #plot_test_vs_chosen_ideal(self.mapped_df, mapped_only = False)
-        plot_test_vs_chosen_ideal_interactive(self.mapped_df, self.visualisation_path, mapped_only=True)
-        plot_test_vs_chosen_ideal_interactive(self.mapped_df, self.visualisation_path, mapped_only=False)
+        plot_test_vs_chosen_ideal(self.mapped_df, self.visualisation_path, mapped_only=True)
+        plot_test_vs_chosen_ideal(self.mapped_df, self.visualisation_path, mapped_only=False)
 
 class ErrorMissingXCol(Exception):
     """Raised when X column is missing in a dataframe"""
