@@ -1,3 +1,12 @@
+"""
+Unit test module for the analyser module.
+Performs unit tests of the high level functions in the analyser module,
+because they contain the most critical logic in the whole program - calculating the results.
+
+Manual data and manually calculated (and verified) results are added to variables below.
+Results are manually calculated, in order to avoid re-using any of the existing analyser logic.
+"""
+
 import pandas as pd
 from src.analyser import calculate_sse, calculate_max_deviation, calculate_train_ideal_sse, assign_ideal_to_test
 
@@ -48,6 +57,14 @@ df_expected_test_mapping_manual = pd.DataFrame({
 })
 
 def test_sse(df_train, df_ideal, dict_expected_results):
+    """
+    Test the SSE function
+    :param df_train: DataFrame containing the unit-test's training dataset.
+    :param df_ideal: DataFrame containing the unit-test's ideal functions dataset.
+    :param dict_expected_results: Dictionary containing the expected results of the unit-test.
+    :return: None
+    """
+
     y_train_col = df_train["y_train"]
     y_ideal_1 = df_ideal["ideal_1"]
     y_ideal_2 = df_ideal["ideal_2"]
@@ -59,6 +76,14 @@ def test_sse(df_train, df_ideal, dict_expected_results):
     print("SSE Calculation Test Passed...")
 
 def test_max_deviation(df_train, df_ideal, dict_expected_results):
+    """
+    Test the Max Deviation function
+    :param df_train: DataFrame containing the unit-test's training dataset.
+    :param df_ideal: DataFrame containing the unit-test's ideal functions dataset.
+    :param dict_expected_results: Dictionary containing the expected results of the unit-test.
+    :return: None
+    """
+
     y_train_col = df_train["y_train"]
     y_ideal_1 = df_ideal["ideal_1"]
     y_ideal_2 = df_ideal["ideal_2"]
@@ -71,21 +96,37 @@ def test_max_deviation(df_train, df_ideal, dict_expected_results):
     print("Max Deviation Calculation Test Passed...")
 
 def test_train_ideal_full_results(df_train, df_ideal, df_expected_result):
+    """
+    Test the function which finds the best ideal functions for each training dataset.
+    :param df_train: DataFrame containing the unit-test's training dataset.
+    :param df_ideal: DataFrame containing the unit-test's ideal functions dataset.
+    :param df_expected_result: DataFrame containing the expected results of the unit-test.
+    :return: None
+    """
 
-    df_returned_result = calculate_train_ideal_sse(df_train, df_ideal)
+    df_returned_result = calculate_train_ideal_sse(df_train, df_ideal, threshold_factor=2**0.5)
 
     # Round the deviation threshold column, to make it easier to type in the manual result at the top
     df_returned_result["test_deviation_threshold"] = df_returned_result["test_deviation_threshold"].round(5)
 
-    pd.testing.assert_frame_equal(df_returned_result, df_expected_result)
+    pd.testing.assert_frame_equal(df_returned_result, df_expected_result) # Pandas assert to compare dataframes.
     print("Train Ideal Full Results Function Test Passed...")
 
 def test_assign_ideal_to_test(df_test, df_ideal, df_mapping, df_expected_result):
+    """
+    Test the function which maps the ideal functions to each test dataset record.
+    :param df_test: DataFrame containing the unit-test's test dataset.
+    :param df_ideal: DataFrame containing the unit-test's ideal functions dataset.
+    :param df_mapping: DataFrame containing the unit-test's mapping between the training dataset and ideal functions.
+    :param df_expected_result: DataFrame containing the expected results of the unit-test.
+    :return: None
+    """
 
     df_returned_result = assign_ideal_to_test(df_test, df_ideal, df_mapping)
     pd.testing.assert_frame_equal(df_returned_result, df_expected_result)
     print("Map Ideal to Test Function Test Passed...")
 
+# Run the unit test functions below.
 test_sse(df_train_manual, df_ideal_manual, expected_sse_manual)
 test_max_deviation(df_train_manual, df_ideal_manual, expected_max_deviation_manual)
 test_train_ideal_full_results(df_train_manual, df_ideal_manual, df_expected_train_ideal_mapping_manual)

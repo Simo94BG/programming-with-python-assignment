@@ -1,11 +1,30 @@
+"""
+Module containing all visualisation functions.
+Uses bokeh to create interactive visualisations.
+Plots both line charts and scatter plots to visualise the results.
+The plots are interactive, zoomable, and provide hover tooltips for easier analysis.
+"""
+
 from bokeh.plotting import figure, output_file, save
 from bokeh.models import ColumnDataSource, HoverTool, Span
 
 def plot_train_vs_chosen_ideal(df_train, df_ideal, df_mapping, visualisation_path):
+    """
+    Plots the training datasets against their chosen ideal function.
+    Plots both:
+    - A line chart of the training dataset vs its ideal function.
+    - A scatter plot of the deviations, for further deviation analysis, if required.
+    :param df_train: DataFrame of the train dataset.
+    :param df_ideal: DataFrame of the ideal functions dataset.
+    :param df_mapping: DataFrame containing the mapping of the training datasets and their chosen ideal functions.
+    :param visualisation_path: The folder path where the visualisations should be stored.
+    :return: None
+    """
 
     x_col = df_train["x"]
     mapping = dict(zip(df_mapping["train_function"], df_mapping["ideal_function"]))
 
+    # For each training dataset from the mapping DataFrame provided...
     for train_col, ideal_col, in mapping.items():
         output_file(f"{visualisation_path}{train_col}_vs_{ideal_col}.html")
         y_train = df_train[train_col]
@@ -27,11 +46,13 @@ def plot_train_vs_chosen_ideal(df_train, df_ideal, df_mapping, visualisation_pat
             ,sizing_mode="stretch_both"
         )
 
+        # Large, centered, bold title
         p.title.text_font_size = "20pt"
         p.title.align = "center"
         p.title.text_font_style = "bold"
 
-        p.line(
+        # Add the train dataset as a scatter plot
+        p.scatter(
             x="x_col"
             ,y="y_train"
             ,source=source
@@ -40,6 +61,7 @@ def plot_train_vs_chosen_ideal(df_train, df_ideal, df_mapping, visualisation_pat
             ,legend_label="Train"
         )
 
+        # Add the ideal function as a line chart
         p.line(
             x="x_col"
             ,y="y_ideal"
@@ -49,6 +71,7 @@ def plot_train_vs_chosen_ideal(df_train, df_ideal, df_mapping, visualisation_pat
             ,legend_label="Ideal"
         )
 
+        # Add the hover tooltips
         hover = HoverTool(
             tooltips=[
                 ("x", "@x_col"),
@@ -65,6 +88,16 @@ def plot_train_vs_chosen_ideal(df_train, df_ideal, df_mapping, visualisation_pat
         save(p)
 
 def plot_train_vs_chosen_ideal_deviation(df_train, df_ideal, df_mapping, visualisation_path):
+    """
+    Plots a scatter plot of the deviation between each training dataset and its chosen ideal function.
+
+    :param df_train: DataFrame of the train dataset.
+    :param df_ideal: DataFrame of the ideal functions dataset.
+    :param df_mapping: DataFrame containing the mapping of the training datasets and their chosen ideal functions.
+    :param visualisation_path: The folder path where the visualisations should be stored.
+    :return: None
+    """
+
     x_col = df_train["x"]
     mapping = dict(zip(df_mapping["train_function"], df_mapping["ideal_function"]))
 
@@ -97,6 +130,7 @@ def plot_train_vs_chosen_ideal_deviation(df_train, df_ideal, df_mapping, visuali
         p.add_layout(x_zero)
         p.add_layout(y_zero)
 
+        # Plot the deviations as a scatter plot.
         p.scatter(
             x="x_col"
             ,y="deviation"
@@ -107,6 +141,7 @@ def plot_train_vs_chosen_ideal_deviation(df_train, df_ideal, df_mapping, visuali
             ,legend_label="Deviation"
         )
 
+        # Add the hover tooltips.
         hover = HoverTool(tooltips=[
             ("x", "@x_col{0.0}")
             , ("Deviation", "@deviation{0.000}")
@@ -118,11 +153,20 @@ def plot_train_vs_chosen_ideal_deviation(df_train, df_ideal, df_mapping, visuali
         save(p)
 
 def plot_test_vs_chosen_ideal(df_test_mapped, visualisation_path, mapped_only = False):
+    """
+    Plot a scatter plot of the test data and the mapped ideal function for each test record.
+    Store the chart HTML file under a different name depending on whether the mapped only test data is plotted, or not.
+
+    :param df_test_mapped: DataFrame of the mapped test dataset.
+    :param visualisation_path: The folder path where the visualisations should be stored.
+    :param mapped_only: Boolean stating whether it's plotting the full dataset or the mapped only dataset.
+    :return: None
+    """
 
     output_file(f"{visualisation_path}test_vs_chosen_ideal.html")
 
+    # If mapped only, store under a separate name.
     if mapped_only:
-        df_test_mapped = df_test_mapped[df_test_mapped["ideal_function"].notna()]
         output_file(f"{visualisation_path}test_vs_chosen_ideal_mapped_only.html")
 
     source = ColumnDataSource(df_test_mapped)
@@ -135,6 +179,7 @@ def plot_test_vs_chosen_ideal(df_test_mapped, visualisation_path, mapped_only = 
         ,sizing_mode="stretch_both"
     )
 
+    # Plot the test dataset as a scatter plot.
     p.scatter(
         x="x_test"
         ,y="y_test"
@@ -145,6 +190,7 @@ def plot_test_vs_chosen_ideal(df_test_mapped, visualisation_path, mapped_only = 
         ,legend_label="Test"
     )
 
+    # Plot the mapped ideal functions as a scatter plot.
     p.scatter(
         x="x_test"
         ,y="y_ideal"
@@ -155,6 +201,7 @@ def plot_test_vs_chosen_ideal(df_test_mapped, visualisation_path, mapped_only = 
         ,legend_label="Ideal"
     )
 
+    # Add the hover tooltips.
     hover = HoverTool(tooltips=[
         ("x", "@x_test{0.0}")
         ,("Test", "@y_test{0.000}")

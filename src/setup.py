@@ -1,10 +1,16 @@
+"""
+Initial setup module.
+Creates the db file if it doesn't exist.
+Wipes any leftover tables in the db file.
+"""
+
 from .database import engine
 import sqlalchemy as sa
 
 def initial_setup():
 
     # Using a direct SQL for now as it's easier.
-    # Maybe later could update to use models.py and create the ORM models.
+    # Maybe later could update to use models.py module and create the ORM models.
 
     with engine.connect() as conn:
         # 1. Get all table names
@@ -18,5 +24,5 @@ def initial_setup():
             conn.execute(sa.text(f'DROP TABLE IF EXISTS "{table}"'))
             conn.execute(sa.text("VACUUM"))
 
-    print("Database re-created at:", engine.url, "...")
+    print("Database (re-)created at:", engine.url, "...")
     print("Initial Setup Completed.")
