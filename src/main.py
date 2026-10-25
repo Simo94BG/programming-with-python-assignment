@@ -2,7 +2,7 @@
 Main module of the Datasets solution.
 This solution finds the best ideal function (from the provided ideal functions dataset) for each training dataset.
 After that, it also maps the best ideal function to each record of the test dataset, provided that it meets the threshold.
-The solution also generates visualisations to aid with analysis.
+The solution also generates interactive visualisations in HTML form, in order to aid with analysis.
 All results are stored in a SQLite database located in the "data" folder of this solution.
 
 This main module runs the full process:
@@ -25,7 +25,6 @@ visualisations_path = "visualisations/" # Folder location for the generated visu
 test_mapping_threshold_factor = 2 ** 0.5 # Test mapping threshold factor. 2 ** 0.5 == sqrt(2) (square root of 2)
 
 if __name__ == "__main__":
-    print("Running Initial Setup...")
     initial_setup()
 
     # 1. Create Dataset Objects
@@ -47,3 +46,5 @@ if __name__ == "__main__":
     # 4. Map the test data and plot the ideals mapped to the test data
     test.map_ideals_to_test(ideal.df, train.best_ideals_df)
     test.plot_mapped_test()
+
+    print("Process completed successfully!")

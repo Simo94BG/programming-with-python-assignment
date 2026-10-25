@@ -8,6 +8,7 @@ from .database import engine
 import sqlalchemy as sa
 
 def initial_setup():
+    print("Running Initial Setup...")
 
     # Using a direct SQL for now as it's easier.
     # Maybe later could update to use models.py module and create the ORM models.

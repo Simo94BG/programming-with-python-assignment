@@ -121,6 +121,8 @@ class TrainDataset(Dataset):
         best_ideals.load_df_to_db() # Load best training & ideal pairs to database.
         self.best_ideals_df = best_ideals.df # Apply best training & ideal pairs to instance dataframe for later use.
 
+        print("Training datasets successfully matched to their closest ideal function!")
+
     def plot_best_ideals(self, df_ideal):
         plot_train_vs_chosen_ideal(self.df, df_ideal, self.best_ideals_df, self.visualisation_path)
 
@@ -162,6 +164,8 @@ class TestDataset(Dataset):
         test_mapped_only = ResultDataset("results_test_mapping", df_test_mapped_only)
         test_mapped_only.load_df_to_db()
         self.df_mapped_only = test_mapped_only.df # Store as Dataframe to use in chart plotting later.
+
+        print("Test data records successfully mapped to the selected ideal functions!")
 
     def plot_mapped_test(self):
         plot_test_vs_chosen_ideal(self.df_mapped_only, self.visualisation_path, mapped_only=True)
