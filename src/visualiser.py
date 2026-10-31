@@ -7,6 +7,7 @@ The plots are interactive, zoomable, and provide hover tooltips for easier analy
 
 from bokeh.plotting import figure, output_file, save
 from bokeh.models import ColumnDataSource, HoverTool, Span
+from bokeh.palettes import Category10
 
 def plot_train_vs_chosen_ideal(df_train, df_ideal, df_mapping, visualisation_path):
     """
@@ -152,22 +153,17 @@ def plot_train_vs_chosen_ideal_deviation(df_train, df_ideal, df_mapping, visuali
 
         save(p)
 
-def plot_test_vs_chosen_ideal(df_test_mapped, visualisation_path, mapped_only = False):
+def plot_test_vs_chosen_ideal_full(df_test_mapped, visualisation_path):
     """
     Plot a scatter plot of the test data and the mapped ideal function for each test record.
-    Store the chart HTML file under a different name depending on whether the mapped only test data is plotted, or not.
+    Plot all test values, and the ideal functions in red.
 
     :param df_test_mapped: DataFrame of the mapped test dataset.
     :param visualisation_path: The folder path where the visualisations should be stored.
-    :param mapped_only: Boolean stating whether it's plotting the full dataset or the mapped only dataset.
     :return: None
     """
 
     output_file(f"{visualisation_path}test_vs_chosen_ideal.html")
-
-    # If mapped only, store under a separate name.
-    if mapped_only:
-        output_file(f"{visualisation_path}test_vs_chosen_ideal_mapped_only.html")
 
     source = ColumnDataSource(df_test_mapped)
 
@@ -196,9 +192,79 @@ def plot_test_vs_chosen_ideal(df_test_mapped, visualisation_path, mapped_only = 
         ,y="y_ideal"
         ,source=source
         ,size=8
-        ,color="blue"
+        ,color="red"
         ,alpha=0.6
         ,legend_label="Ideal"
+    )
+
+    # Add the hover tooltips.
+    hover = HoverTool(tooltips=[
+        ("x", "@x_test{0.0}")
+        ,("Test", "@y_test{0.000}")
+        ,("Ideal", "@y_ideal{0.000}")
+        ,("Deviation", "@deviation{0.000}")
+        ,("Ideal Function", "@ideal_function")
+    ])
+    p.add_tools(hover)
+
+    p.legend.click_policy = "hide"
+
+    save(p)
+
+def plot_test_vs_chosen_ideal_mapped_only(df_test_mapped, visualisation_path):
+    """
+    Plot a scatter plot of the test data and the mapped ideal function for each test record.
+    Plot only the mapped values, and the ideal functions in a different colour.
+
+    :param df_test_mapped: DataFrame of the mapped test dataset.
+    :param visualisation_path: The folder path where the visualisations should be stored.
+    :return: None
+    """
+
+    output_file(f"{visualisation_path}test_vs_chosen_ideal_mapped_only.html")
+
+    # Get a list of the unique ideal functions
+    unique_ideals = sorted(df_test_mapped["ideal_function"].dropna().unique())
+
+    # Map each ideal function to its own colour
+    colour_map = dict(zip(unique_ideals, Category10[10]))
+
+    # Add the colours to the dataframe
+    df_test_mapped["colour"] = df_test_mapped["ideal_function"].map(colour_map)
+
+    # Sort the dataframe, so that the legend labels are sorted
+    df_test_mapped = df_test_mapped.sort_values("ideal_function")
+
+    source = ColumnDataSource(df_test_mapped)
+
+    p = figure(
+        title="Test vs Chosen Ideal"
+        ,x_axis_label="x"
+        ,y_axis_label="y"
+        ,tools="pan, wheel_zoom, box_zoom, reset, save"
+        ,sizing_mode="stretch_both"
+    )
+
+    # Plot the test dataset as a scatter plot.
+    p.scatter(
+        x="x_test"
+        ,y="y_test"
+        ,source=source
+        ,size=8
+        ,color="black"
+        ,alpha=0.6
+        ,legend_label="Test"
+    )
+
+    # Plot the mapped ideal functions as a scatter plot.
+    p.scatter(
+        x="x_test"
+        ,y="y_ideal"
+        ,source=source
+        ,size=8
+        ,color="colour"
+        ,alpha=0.6
+        ,legend_field="ideal_function" # legend_field, as we're taking the value from the dataframe.
     )
 
     # Add the hover tooltips.

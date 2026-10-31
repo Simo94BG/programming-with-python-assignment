@@ -10,7 +10,12 @@ Functionality includes:
 import pandas as pd
 from .database import engine
 from .analyser import calculate_train_ideal_sse, find_best_ideal, assign_ideal_to_test
-from .visualiser import plot_train_vs_chosen_ideal, plot_train_vs_chosen_ideal_deviation, plot_test_vs_chosen_ideal
+from .visualiser import (
+    plot_train_vs_chosen_ideal
+    ,plot_train_vs_chosen_ideal_deviation
+    ,plot_test_vs_chosen_ideal_full
+    ,plot_test_vs_chosen_ideal_mapped_only
+)
 
 class Dataset:
 
@@ -168,8 +173,8 @@ class TestDataset(Dataset):
         print("Test data records successfully mapped to the selected ideal functions!")
 
     def plot_mapped_test(self):
-        plot_test_vs_chosen_ideal(self.df_mapped_only, self.visualisation_path, mapped_only=True)
-        plot_test_vs_chosen_ideal(self.df_mapped_full, self.visualisation_path, mapped_only=False)
+        plot_test_vs_chosen_ideal_full(self.df_mapped_full, self.visualisation_path)
+        plot_test_vs_chosen_ideal_mapped_only(self.df_mapped_only, self.visualisation_path)
 
 class ErrorMissingXCol(Exception):
     """Raised when the X column is missing in a dataframe"""
